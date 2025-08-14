@@ -1,9 +1,11 @@
 version: "3.9"
+
 services:
   nginx:
     build:
       context: .
       dockerfile: ./requirements/nginx/Dockerfile
+    image: nginx:v1.0
     container_name: nginx
     env_file:
       - ./.env
@@ -16,10 +18,12 @@ services:
     depends_on:
       - wordpress
     restart: always
+
   wordpress:
     build:
       context: .
       dockerfile: ./requirements/wordpress/Dockerfile
+    image: wordpress:v1.0
     container_name: wordpress
     env_file:
       - ./.env
@@ -32,22 +36,33 @@ services:
     depends_on:
       - mariadb
     restart: always
+    secrets:
+      - wp_admin_pass
+      - wp_pass
+      - db_pass
+
   mariadb:
     build:
       context: .
       dockerfile: ./requirements/mariadb/Dockerfile
+    image: mariadb:v1.0
     container_name: mariadb
-    volumes:
-      - mariadb:/var/lib/mysql
-    networks:
-      - web
     env_file:
       - ./.env
+    volumes:
+      - mariadb:/var/lib/mysql
     ports:
       - "3306:3306"
+    networks:
+      - web
     restart: always
+    secrets:
+      - db_pass
+      - db_root_pass
+
 networks:
   web:
+
 volumes:
   wordpress:
     name: wordpress
@@ -56,6 +71,7 @@ volumes:
       type: 'none'
       o: 'bind'
       device: /home/esimpson/data/wordpress
+
   mariadb:
     name: mariadb
     driver: local
@@ -63,3 +79,13 @@ volumes:
       type: 'none'
       o: 'bind'
       device: /home/esimpson/data/mariadb
+
+secrets:
+  db_pass:
+    file: ../secrets/db_pass
+  db_root_pass:
+    file: ../secrets/db_root_pass
+  wp_admin_pass:
+    file: ../secrets/wp_admin_pass
+  wp_pass:
+    file: ../secrets/wp_pass

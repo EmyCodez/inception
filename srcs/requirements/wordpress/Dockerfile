@@ -3,7 +3,7 @@ FROM debian:bookworm
 USER root
 
 # Install PHP 8.2 and required packages
-RUN apt update && apt install -y \
+RUN apt-get update && apt-get install -y \
     wget \
     curl \
     sendmail \
